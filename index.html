@@ -24,14 +24,17 @@
             animation: spin 1s linear infinite;
         }
         @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>
 <body>
     <div id="root" class="min-h-screen p-4 sm:p-8"></div>
-    
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -54,80 +57,82 @@
         };
 
         const workoutPlan = {
-          1: {
-            name: "Pecho + Tríceps",
-            color: "bg-red-500",
-            emoji: "🔴",
-            cardio: "8 min HIIT en bici (30'' fuerte / 30'' suave)",
-            exercises: [
-              { id: 1, name: "Press inclinado con barra", sets: "4x6-8", image: "🏋️‍♂️", description: "Acostado en banco inclinado, empuja la barra desde el pecho hacia arriba", muscles: "Pecho superior, tríceps, hombros", videoUrl: "https://www.youtube.com/watch?v=IP7ticIK9M8" },
-              { id: 2, name: "Press plano con mancuernas", sets: "3x8-10", special: "rest-pause última serie", image: "💪", description: "En banco plano, baja las mancuernas al pecho y empuja hacia arriba", muscles: "Pecho medio, tríceps, hombros", videoUrl: "https://www.youtube.com/watch?v=VmB1G1K7v94" },
-              { id: 3, name: "Press en máquina convergente", sets: "3x10-12", image: "🏋️", description: "Sentado en la máquina, empuja los agarres hacia adelante", muscles: "Pecho, tríceps", videoUrl: "https://www.youtube.com/watch?v=xUm0BiZCWlQ" },
-              { id: 4, name: "Aperturas en polea baja", sets: "3x12-15", image: "🤸‍♂️", description: "Con cables bajos, lleva los brazos hacia arriba y al centro", muscles: "Pecho inferior", videoUrl: "https://www.youtube.com/watch?v=3cKUD-WM0bU" },
-              { id: 5, name: "Fondos en paralelas", sets: "3x8-10", special: "lastre si podés", image: "🏃‍♂️", description: "En paralelas, baja el cuerpo y empuja hacia arriba", muscles: "Pecho inferior, tríceps", videoUrl: "https://www.youtube.com/watch?v=2z8JmcrW-As" },
-              { id: 6, name: "Tríceps en cuerda", sets: "3x15", special: "dropset última", image: "💥", description: "En polea alta, extiende los tríceps separando la cuerda", muscles: "Tríceps", videoUrl: "https://www.youtube.com/watch?v=kiuVA0gs3EI" }
-            ]
-          },
-          2: {
-            name: "Espalda + Bíceps",
-            color: "bg-blue-500",
-            emoji: "🔵",
-            cardio: "10 min caminadora inclinada (LISS zona 2-3)",
-            exercises: [
-              { id: 7, name: "Dominadas supinas", sets: "4x6-10", image: "🏋️‍♀️", description: "Colgado de la barra, sube el cuerpo con agarre supino", muscles: "Espalda, bíceps", videoUrl: "https://www.youtube.com/watch?v=eGo4IYlbE5g" },
-              { id: 8, name: "Remo en barra T", sets: "4x8-10", image: "🚣‍♂️", description: "Inclínate y tira de la barra T hacia tu abdomen", muscles: "Espalda media, bíceps", videoUrl: "https://www.youtube.com/watch?v=j3Igk5nyZE4" },
-              { id: 9, name: "Jalón con agarre V", sets: "3x12", image: "⬇️", description: "Sentado, tira del agarre V hacia el pecho", muscles: "Dorsales, bíceps", videoUrl: "https://www.youtube.com/watch?v=CAwf7n6Luuc" },
-              { id: 10, name: "Remo unilateral con mancuerna", sets: "3x12", image: "🏋️", description: "Apoyado en banco, rema la mancuerna hacia la cadera", muscles: "Dorsales, romboides, bíceps", videoUrl: "https://www.youtube.com/watch?v=roCP6wCXPqo" },
-              { id: 11, name: "Curl con barra Z", sets: "4x8-10", image: "💪", description: "De pie, flexiona los bíceps con la barra Z", muscles: "Bíceps", videoUrl: "https://www.youtube.com/watch?v=kwG2ipFRgfo" },
-              { id: 12, name: "Curl alterno en banco inclinado", sets: "3x10-12", image: "🏋️‍♂️", description: "En banco inclinado, alterna curls con mancuernas", muscles: "Bíceps", videoUrl: "https://www.youtube.com/watch?v=soxrZlIl35U" }
-            ]
-          },
-          3: {
-            name: "Piernas",
-            color: "bg-green-500",
-            emoji: "🟢",
-            cardio: null,
-            exercises: [
-              { id: 13, name: "Sentadilla frontal con barra", sets: "4x8-10", image: "🏋️‍♀️", description: "Barra en la parte frontal, baja en sentadilla", muscles: "Cuádriceps, glúteos, core", videoUrl: "https://www.youtube.com/watch?v=uYumuL_G_V0" },
-              { id: 14, name: "Prensa 45° pies bajos", sets: "4x12", image: "🦵", description: "En máquina de prensa, pies en posición baja", muscles: "Cuádriceps, glúteos", videoUrl: "https://www.youtube.com/watch?v=IZxyjW7MPJQ" },
-              { id: 15, name: "Peso muerto rumano con barra", sets: "4x10", image: "🏋️", description: "Barra pegada al cuerpo, baja manteniendo piernas semi-flexionadas", muscles: "Glúteos, femorales", videoUrl: "https://www.youtube.com/watch?v=2SHsk9AzdjA" },
-              { id: 16, name: "Zancadas caminando", sets: "3x12 c/pierna", image: "🚶‍♂️", description: "Da pasos largos alternando piernas", muscles: "Glúteos, cuádriceps, femorales", videoUrl: "https://www.youtube.com/watch?v=D7KaRcUTQeE" },
-              { id: 17, name: "Curl femoral en máquina", sets: "3x12-15", image: "🦵", description: "Acostado, flexiona las piernas hacia los glúteos", muscles: "Femorales", videoUrl: "https://www.youtube.com/watch?v=1Tq3QdYUuHs" },
-              { id: 18, name: "Gemelos en prensa", sets: "4x20", image: "🏋️‍♂️", description: "En prensa, trabaja solo con la punta de los pies", muscles: "Gemelos", videoUrl: "https://www.youtube.com/watch?v=3jCwWyFsrj4" }
-            ]
-          },
-          4: {
-            name: "Hombros + Abdomen",
-            color: "bg-purple-500",
-            emoji: "🟣",
-            cardio: null,
-            exercises: [
-              { id: 19, name: "Press militar con mancuernas", sets: "4x8-10", image: "🏋️‍♀️", description: "Sentado, empuja las mancuernas desde los hombros hacia arriba", muscles: "Hombros, tríceps", videoUrl: "https://www.youtube.com/watch?v=qEwKCR5JCog" },
-              { id: 20, name: "Press Arnold", sets: "3x10-12", image: "💪", description: "Rota las mancuernas mientras empujas hacia arriba", muscles: "Hombros completos", videoUrl: "https://www.youtube.com/watch?v=6Z15_WdXmVw" },
-              { id: 21, name: "Elevaciones laterales en máquina", sets: "3x12-15", special: "dropset última", image: "🤸‍♂️", description: "Sentado, eleva los brazos hacia los lados", muscles: "Hombro lateral", videoUrl: "https://www.youtube.com/watch?v=3VcKaas9EaU" },
-              { id: 22, name: "Remo al cuello con barra", sets: "3x12", image: "🏋️", description: "Tira de la barra hacia el cuello con codos altos", muscles: "Hombros, trapecios", videoUrl: "https://www.youtube.com/watch?v=XP8H8MtUlbE" },
-              { id: 23, name: "Pájaros con mancuernas", sets: "3x15", image: "🦅", description: "Inclínate y abre los brazos hacia los lados", muscles: "Hombro posterior", videoUrl: "https://www.youtube.com/watch?v=T1U3_ymG2d4" },
-              { id: 24, name: "Ab wheel", sets: "3x12", image: "⚙️", description: "Rueda hacia adelante manteniendo el core tenso", muscles: "Abdominales, core", videoUrl: "https://www.youtube.com/watch?v=UAxrT_AFmjw" },
-              { id: 25, name: "Crunch inverso en banco declinado", sets: "3x15", image: "🏋️‍♂️", description: "En banco declinado, lleva las rodillas al pecho", muscles: "Abdominales inferiores", videoUrl: "https://www.youtube.com/watch?v=CA3lq6m-ols" }
-            ]
-          },
-          5: {
-            name: "Upper Power",
-            color: "bg-orange-500",
-            emoji: "🟠",
-            cardio: "10 min HIIT (remo o assault bike)",
-            exercises: [
-              { id: 26, name: "Press plano con barra", sets: "4x6-8", image: "🏋️‍♂️", description: "En banco plano, empuja la barra desde el pecho", muscles: "Pecho, tríceps, hombros", videoUrl: "https://www.youtube.com/watch?v=gRVjAtPip0Y" },
-              { id: 27, name: "Dominadas neutras", sets: "4x6-10", image: "🏋️‍♀️", description: "Colgado con agarre neutro, sube el cuerpo", muscles: "Espalda, bíceps", videoUrl: "https://www.youtube.com/watch?v=eGo4IYlbE5g" },
-              { id: 28, name: "Remo con barra", sets: "4x8", image: "🚣‍♂️", description: "Inclínate y tira de la barra hacia el abdomen", muscles: "Espalda, bíceps", videoUrl: "https://www.youtube.com/watch?v=9efgcAjQe7E" },
-              { id: 29, name: "Press militar en máquina", sets: "3x8-10", special: "rest-pause última", image: "🏋️", description: "Sentado en máquina, empuja hacia arriba", muscles: "Hombros, tríceps", videoUrl: "https://www.youtube.com/watch?v=M2rwvNhTOu0" },
-              { id: 30, name: "Curl martillo en polea", sets: "3x12", image: "🔨", description: "Con agarre neutro, flexiona los bíceps", muscles: "Bíceps, antebrazos", videoUrl: "https://www.youtube.com/watch?v=TwD-YGVP4Bk" },
-              { id: 31, name: "Extensión de tríceps por encima de la cabeza con cuerda", sets: "3x12-15", image: "💥", description: "Extiende los tríceps por encima de la cabeza", muscles: "Tríceps", videoUrl: "https://www.youtube.com/watch?v=CLAzwNJUgUg" }
-            ]
-          }
+            1: {
+                name: "Pecho + Tr’ceps",
+                color: "bg-red-500",
+                emoji: "💪",
+                cardio: "8 min HIIT en bici (30'' fuerte / 30'' suave)",
+                exercises: [
+                    { id: 1, name: "Press inclinado con barra", sets: "4x6-8", image: "🏋️‍♂️", description: "Acostado en banco inclinado, empuja la barra desde el pecho hacia arriba", muscles: "Pecho superior, tr’ceps, hombros", videoUrl: "https://www.youtube.com/watch?v=IP7ticIK9M8" },
+                    { id: 2, name: "Press plano con mancuernas", sets: "3x8-10", special: "rest-pause œltima serie", image: "🏋️‍♀️", description: "En banco plano, baja las mancuernas al pecho y empuja hacia arriba", muscles: "Pecho medio, tr’ceps, hombros", videoUrl: "https://www.youtube.com/watch?v=VmB1G1K7v94" },
+                    { id: 3, name: "Press en m‡quina convergente", sets: "3x10-12", image: "⚙️", description: "Sentado en la m‡quina, empuja los agarres hacia adelante", muscles: "Pecho, tr’ceps", videoUrl: "https://www.youtube.com/watch?v=xUm0BiZCWlQ" },
+                    { id: 4, name: "Aperturas en polea baja", sets: "3x12-15", image: "🎚️", description: "Con cables bajos, lleva los brazos hacia arriba y al centro", muscles: "Pecho inferior", videoUrl: "https://www.youtube.com/watch?v=3cKUD-WM0bU" },
+                    { id: 5, name: "Fondos en paralelas", sets: "3x8-10", special: "lastre si podŽs", image: "🤸‍♂️", description: "En paralelas, baja el cuerpo y empuja hacia arriba", muscles: "Pecho inferior, tr’ceps", videoUrl: "https://www.youtube.com/watch?v=2z8JmcrW-As" },
+                    { id: 6, name: "Tr’ceps en cuerda", sets: "3x15", special: "dropset œltima", image: "💪", description: "En polea alta, extiende los tr’ceps separando la cuerda", muscles: "Tr’ceps", videoUrl: "https://www.youtube.com/watch?v=kiuVA0gs3EI" }
+                ]
+            },
+            2: {
+                name: "Espalda + B’ceps",
+                color: "bg-blue-500",
+                emoji: "🔙",
+                cardio: "10 min caminadora inclinada (LISS zona 2-3)",
+                exercises: [
+                    { id: 7, name: "Dominadas supinas", sets: "4x6-10", image: "💪", description: "Colgado de la barra, sube el cuerpo con agarre supino", muscles: "Espalda, b’ceps", videoUrl: "https://www.youtube.com/watch?v=eGo4IYlbE5g" },
+                    { id: 8, name: "Remo en barra T", sets: "4x8-10", image: "🏋️‍♀️", description: "Incl’nate y tira de la barra T hacia tu abdomen", muscles: "Espalda media, b’ceps", videoUrl: "https://www.youtube.com/watch?v=j3Igk5nyZE4" },
+                    { id: 9, name: "Jal—n con agarre V", sets: "3x12", image: "⚙️", description: "Sentado, tira del agarre V hacia el pecho", muscles: "Dorsales, b’ceps", videoUrl: "https://www.youtube.com/watch?v=CAwf7n6Luuc" },
+                    { id: 10, name: "Remo unilateral con mancuerna", sets: "3x12", image: "💪", description: "Apoyado en banco, rema la mancuerna hacia la cadera", muscles: "Dorsales, romboides, b’ceps", videoUrl: "https://www.youtube.com/watch?v=roCP6wCXPqo" },
+                    { id: 11, name: "Curl con barra Z", sets: "4x8-10", image: "🏋️‍♂️", description: "De pie, flexiona los b’ceps con la barra Z", muscles: "B’ceps", videoUrl: "https://www.youtube.com/watch?v=kwG2ipFRgfo" },
+                    { id: 12, name: "Curl alterno en banco inclinado", sets: "3x10-12", image: "🏋️‍♀️", description: "En banco inclinado, alterna curls con mancuernas", muscles: "B’ceps", videoUrl: "https://www.youtube.com/watch?v=soxrZlIl35U" }
+                ]
+            },
+            3: {
+                name: "Piernas",
+                color: "bg-green-500",
+                emoji: "🦵",
+                cardio: null,
+                exercises: [
+                    { id: 13, name: "Sentadilla frontal con barra", sets: "4x8-10", image: "🏋️‍♂️", description: "Barra en la parte frontal, baja en sentadilla", muscles: "Cu‡driceps, glœteos, core", videoUrl: "https://www.youtube.com/watch?v=uYumuL_G_V0" },
+                    { id: 14, name: "Prensa 45¡ pies bajos", sets: "4x12", image: "⚙️", description: "En m‡quina de prensa, pies en posici—n baja", muscles: "Cu‡driceps, glœteos", videoUrl: "https://www.youtube.com/watch?v=IZxyjW7MPJQ" },
+                    { id: 15, name: "Peso muerto rumano con barra", sets: "4x10", image: "🏋️‍♂️", description: "Barra pegada al cuerpo, baja manteniendo piernas semi-flexionadas", muscles: "Glœteos, femorales", videoUrl: "https://www.youtube.com/watch?v=2SHsk9AzdjA" },
+                    { id: 16, name: "Zancadas caminando", sets: "3x12 c/pierna", image: "🚶", description: "Da pasos largos alternando piernas", muscles: "Glœteos, cu‡driceps, femorales", videoUrl: "https://www.youtube.com/watch?v=D7KaRcUTQeE" },
+                    { id: 17, name: "Curl femoral en m‡quina", sets: "3x12-15", image: "⚙️", description: "Acostado, flexiona las piernas hacia los glœteos", muscles: "Femorales", videoUrl: "https://www.youtube.com/watch?v=1Tq3QdYUuHs" },
+                    { id: 18, name: "Gemelos en prensa", sets: "4x20", image: "🏋️‍♂️", description: "En prensa, trabaja solo con la punta de los pies", muscles: "Gemelos", videoUrl: "https://www.youtube.com/watch?v=3jCwWyFsrj4" }
+                ]
+            },
+            4: {
+                name: "Hombros + Abdomen",
+                color: "bg-purple-500",
+                emoji: "🧘",
+                cardio: null,
+                exercises: [
+                    { id: 19, name: "Press militar con mancuernas", sets: "4x8-10", image: "🏋️‍♀️", description: "Sentado, empuja las mancuernas desde los hombros hacia arriba", muscles: "Hombros, tr’ceps", videoUrl: "https://www.youtube.com/watch?v=qEwKCR5JCog" },
+                    { id: 20, name: "Press Arnold", sets: "3x10-12", image: "🏋️‍♂️", description: "Rota las mancuernas mientras empujas hacia arriba", muscles: "Hombros completos", videoUrl: "https://www.youtube.com/watch?v=6Z15_WdXmVw" },
+                    { id: 21, name: "Elevaciones laterales en m‡quina", sets: "3x12-15", special: "dropset œltima", image: "⚙️", description: "Sentado, eleva los brazos hacia los lados", muscles: "Hombro lateral", videoUrl: "https://www.youtube.com/watch?v=3VcKaas9EaU" },
+                    { id: 22, name: "Remo al cuello con barra", sets: "3x12", image: "🏋️‍♀️", description: "Tira de la barra hacia el cuello con codos altos", muscles: "Hombros, trapecios", videoUrl: "https://www.youtube.com/watch?v=XP8H8MtUlbE" },
+                    { id: 23, name: "P‡jaros con mancuernas", sets: "3x15", image: "🏋️‍♂️", description: "Incl’nate y abre los brazos hacia los lados", muscles: "Hombro posterior", videoUrl: "https://www.youtube.com/watch?v=T1U3_ymG2d4" },
+                    { id: 24, name: "Ab wheel", sets: "3x12", image: "🤸‍♀️", description: "Rueda hacia adelante manteniendo el core tenso", muscles: "Abdominales, core", videoUrl: "https://www.youtube.com/watch?v=UAxrT_AFmjw" },
+                    { id: 25, name: "Crunch inverso en banco declinado", sets: "3x15", image: "🏋️‍♂️", description: "En banco declinado, lleva las rodillas al pecho", muscles: "Abdominales inferiores", videoUrl: "https://www.youtube.com/watch?v=CA3lq6m-ols" }
+                ]
+            },
+            5: {
+                name: "Upper Power",
+                color: "bg-orange-500",
+                emoji: "⚡",
+                cardio: "10 min HIIT (remo o assault bike)",
+                exercises: [
+                    { id: 26, name: "Press plano con barra", sets: "4x6-8", image: "🏋️‍♂️", description: "En banco plano, empuja la barra desde el pecho", muscles: "Pecho, tr’ceps, hombros", videoUrl: "https://www.youtube.com/watch?v=gRVjAtPip0Y" },
+                    { id: 27, name: "Dominadas neutras", sets: "4x6-10", image: "🤸‍♂️", description: "Colgado con agarre neutro, sube el cuerpo", muscles: "Espalda, b’ceps", videoUrl: "https://www.youtube.com/watch?v=eGo4IYlbE5g" },
+                    { id: 28, name: "Remo con barra", sets: "4x8", image: "🏋️‍♀️", description: "Incl’nate y tira de la barra hacia el abdomen", muscles: "Espalda, b’ceps", videoUrl: "https://www.youtube.com/watch?v=9efgcAjQe7E" },
+                    { id: 29, name: "Press militar en m‡quina", sets: "3x8-10", special: "rest-pause œltima", image: "⚙️", description: "Sentado en m‡quina, empuja hacia arriba", muscles: "Hombros, tr’ceps", videoUrl: "https://www.youtube.com/watch?v=M2rwvNhTOu0" },
+                    { id: 30, name: "Curl martillo en polea", sets: "3x12", image: "💪", description: "Con agarre neutro, flexiona los b’ceps", muscles: "B’ceps, antebrazos", videoUrl: "https://www.youtube.com/watch?v=TwD-YGVP4Bk" },
+                    { id: 31, name: "Extensi—n de tr’ceps por encima de la cabeza con cuerda", sets: "3x12-15", image: "💪", description: "Extiende los tr’ceps por encima de la cabeza", muscles: "Tr’ceps", videoUrl: "https://www.youtube.com/watch?v=CLAzwNJUgUg" }
+                ]
+            }
         };
 
         const root = document.getElementById('root');
+
+        // Variables de estado
         let currentDay = null;
         let selectedExercise = null;
         let timer = 0;
@@ -137,12 +142,15 @@
         let userId = null;
         let isSaving = false;
         let showSaved = false;
-
         let db, auth;
+        let timerInterval;
+
+        // Variables globales (proporcionadas por el entorno)
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
+        // Renderiza la UI basándose en el estado actual
         const render = () => {
             if (!isAuthReady) {
                 root.innerHTML = `
@@ -157,15 +165,15 @@
             }
 
             if (!currentDay) {
+                // Vista de selección de día
                 root.innerHTML = `
                     <div class="min-h-screen py-8">
                         <div class="container mx-auto px-4">
                             <div class="text-center mb-8">
                                 <h1 class="text-4xl font-bold mb-2 flex items-center justify-center gap-2">
-                                    ${icons.Dumbbell}
-                                    Tracker de Entrenamiento
+                                    ${icons.Dumbbell} Tracker de Entrenamiento
                                 </h1>
-                                <p class="text-gray-300">Selecciona tu día de entrenamiento</p>
+                                <p class="text-gray-300">Selecciona tu d’a de entrenamiento</p>
                                 ${userId ? `<p class="text-xs text-gray-500 mt-2">ID de usuario: ${userId}</p>` : ''}
                             </div>
                             <div class="grid gap-4 max-w-2xl mx-auto">
@@ -175,7 +183,7 @@
                                             <div class="flex items-center gap-3">
                                                 <span class="text-2xl">${plan.emoji}</span>
                                                 <div class="text-left">
-                                                    <h3 class="text-xl font-bold">Día ${day}</h3>
+                                                    <h3 class="text-xl font-bold">D’a ${day}</h3>
                                                     <p class="text-white/90">${plan.name}</p>
                                                     <p class="text-sm text-white/70">${plan.exercises.length} ejercicios</p>
                                                 </div>
@@ -193,16 +201,17 @@
 
             const currentPlan = workoutPlan[currentDay];
             if (selectedExercise) {
+                // Vista de detalle de ejercicio
                 const exercise = currentPlan.exercises.find(ex => ex.id === selectedExercise);
                 const lastSessionData = workoutData[exercise.id]?.lastSession || {};
+                const currentSessionData = workoutData[exercise.id]?.sets || {};
 
                 root.innerHTML = `
                     <div class="min-h-screen py-8">
                         <div class="container mx-auto px-4">
                             <div class="max-w-2xl mx-auto">
                                 <button onclick="selectExercise(null)" class="mb-4 flex items-center gap-2 text-gray-300 hover:text-white transition-colors">
-                                    ${icons.X}
-                                    Volver
+                                    ${icons.X} Volver
                                 </button>
                                 <div class="bg-gray-800 rounded-xl p-6 shadow-xl">
                                     <div class="text-center mb-6">
@@ -214,15 +223,14 @@
                                         </div>
                                     </div>
                                     <div class="mb-6">
-                                        <h3 class="font-semibold mb-2">Técnica:</h3>
+                                        <h3 class="font-semibold mb-2">TŽcnica:</h3>
                                         <p class="text-gray-300 mb-4">${exercise.description}</p>
-                                        <h3 class="font-semibold mb-2">Músculos trabajados:</h3>
+                                        <h3 class="font-semibold mb-2">Mœsculos trabajados:</h3>
                                         <p class="text-blue-300 mb-4">${exercise.muscles}</p>
                                         ${exercise.videoUrl ? `
                                             <div class="mb-4">
                                                 <a href="${exercise.videoUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors">
-                                                    ${icons.ExternalLink}
-                                                    Ver video tutorial
+                                                    ${icons.ExternalLink} Ver video tutorial
                                                 </a>
                                             </div>
                                         ` : ''}
@@ -234,15 +242,14 @@
                                                 ${Array.from({ length: parseInt(exercise.sets.split('x')[0]) || 3 }).map((_, i) => {
                                                     const setNumber = i + 1;
                                                     const lastData = lastSessionData[setNumber] || {};
+                                                    const currentData = currentSessionData[setNumber] || {};
                                                     return `
                                                         <div class="bg-gray-700 rounded-lg p-4">
                                                             <div class="flex items-center justify-between mb-3">
                                                                 <h4 class="font-medium">Serie ${setNumber}</h4>
                                                                 <div class="text-sm text-gray-300">
-                                                                    ${(lastData.weight || lastData.reps) ? `
-                                                                        <span class="bg-gray-600 px-2 py-1 rounded text-xs">
-                                                                            Anterior: ${lastData.weight || 0}kg × ${lastData.reps || 0}
-                                                                        </span>
+                                                                    ${(lastData.weight > 0 || lastData.reps > 0) ? `
+                                                                        <span class="bg-gray-600 px-2 py-1 rounded text-xs"> Anterior: ${lastData.weight || 0}kg × ${lastData.reps || 0} </span>
                                                                     ` : ''}
                                                                 </div>
                                                             </div>
@@ -251,7 +258,7 @@
                                                                     <label class="block text-sm font-medium mb-1">Peso (kg)</label>
                                                                     <div class="flex items-center gap-1">
                                                                         <button onclick="updateSetData(${exercise.id}, ${setNumber}, 'weight', (getSetData(${exercise.id}, ${setNumber}, 'weight') || 0) - 2.5)" class="bg-red-600 hover:bg-red-700 p-1 rounded text-xs">${icons.Minus}</button>
-                                                                        <input type="number" step="2.5" value="${getSetData(exercise.id, setNumber, 'weight')}" onchange="updateSetData(${exercise.id}, ${setNumber}, 'weight', parseFloat(this.value) || 0)" class="flex-1 bg-gray-600 border border-gray-500 rounded px-2 py-1 text-center text-sm" placeholder="0"/>
+                                                                        <input type="number" step="2.5" value="${currentData.weight || ''}" onchange="updateSetData(${exercise.id}, ${setNumber}, 'weight', parseFloat(this.value) || 0)" class="flex-1 bg-gray-600 border border-gray-500 rounded px-2 py-1 text-center text-sm" placeholder="0"/>
                                                                         <button onclick="updateSetData(${exercise.id}, ${setNumber}, 'weight', (getSetData(${exercise.id}, ${setNumber}, 'weight') || 0) + 2.5)" class="bg-green-600 hover:bg-green-700 p-1 rounded text-xs">${icons.Plus}</button>
                                                                     </div>
                                                                 </div>
@@ -259,7 +266,7 @@
                                                                     <label class="block text-sm font-medium mb-1">Reps</label>
                                                                     <div class="flex items-center gap-1">
                                                                         <button onclick="updateSetData(${exercise.id}, ${setNumber}, 'reps', (getSetData(${exercise.id}, ${setNumber}, 'reps') || 0) - 1)" class="bg-red-600 hover:bg-red-700 p-1 rounded text-xs">${icons.Minus}</button>
-                                                                        <input type="number" value="${getSetData(exercise.id, setNumber, 'reps')}" onchange="updateSetData(${exercise.id}, ${setNumber}, 'reps', parseInt(this.value) || 0)" class="flex-1 bg-gray-600 border border-gray-500 rounded px-2 py-1 text-center text-sm" placeholder="0"/>
+                                                                        <input type="number" value="${currentData.reps || ''}" onchange="updateSetData(${exercise.id}, ${setNumber}, 'reps', parseInt(this.value) || 0)" class="flex-1 bg-gray-600 border border-gray-500 rounded px-2 py-1 text-center text-sm" placeholder="0"/>
                                                                         <button onclick="updateSetData(${exercise.id}, ${setNumber}, 'reps', (getSetData(${exercise.id}, ${setNumber}, 'reps') || 0) + 1)" class="bg-green-600 hover:bg-green-700 p-1 rounded text-xs">${icons.Plus}</button>
                                                                     </div>
                                                                 </div>
@@ -271,26 +278,24 @@
                                         </div>
                                         <div class="bg-gray-700 rounded-lg p-4">
                                             <h4 class="font-medium mb-3">Notas generales del ejercicio</h4>
-                                            <textarea onblur="updateExerciseNotes(${exercise.id}, this.value)" class="w-full bg-gray-600 border border-gray-500 rounded px-3 py-2 text-sm" rows="2" placeholder="Sensaciones, técnica, ajustes para la próxima...">${getExerciseNotes(exercise.id)}</textarea>
+                                            <textarea onblur="updateExerciseNotes(${exercise.id}, this.value)" class="w-full bg-gray-600 border border-gray-500 rounded px-3 py-2 text-sm" rows="2" placeholder="Sensaciones, tŽcnica, ajustes para la pr—xima...">${getExerciseNotes(exercise.id)}</textarea>
                                         </div>
                                         <div class="bg-blue-800/20 border border-blue-600/30 rounded-lg p-4">
-                                            <h4 class="font-medium mb-2 text-blue-300">📈 Progreso Sugerido</h4>
+                                            <h4 class="font-semibold mb-2 text-blue-300">💡 Progreso Sugerido</h4>
                                             <div class="text-sm text-gray-300 space-y-1">
-                                                <p>• Si completaste todas las reps: +2.5kg la próxima vez</p>
-                                                <p>• Si te quedaste 2+ reps corto: mantén el peso</p>
-                                                <p>• Si fue muy fácil: +5kg la próxima vez</p>
+                                                <p>• Si completaste todas las reps: +2.5kg la pr—xima vez</p>
+                                                <p>• Si te quedaste 2+ reps corto: mantŽn el peso</p>
+                                                <p>• Si fue muy f‡cil: +5kg la pr—xima vez</p>
                                             </div>
                                         </div>
                                         <div class="flex gap-2 relative">
                                             <button onclick="saveWorkoutSession(${exercise.id})" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors relative">
-                                                ${isSaving ? `<div class="inline-block h-5 w-5 animate-spin">${icons.Loader2}</div>` : icons.Save}
-                                                Guardar Sesión
+                                                ${isSaving ? `<div class="inline-block h-5 w-5 animate-spin">${icons.Loader2}</div>` : icons.Save} Guardar Sesi—n
                                             </button>
                                             ${showSaved ? `
                                                 <div class="absolute inset-0 flex items-center justify-center bg-green-500/80 rounded-lg backdrop-blur-sm z-10 transition-opacity duration-300">
                                                     <div class="flex items-center gap-2 text-white font-semibold">
-                                                        ${icons.Check}
-                                                        Guardado
+                                                        ${icons.Check} Guardado
                                                     </div>
                                                 </div>
                                             ` : ''}
@@ -315,12 +320,10 @@
                                             </div>
                                             <div class="flex justify-center gap-2">
                                                 <button onclick="toggleTimer()" class="flex items-center gap-2 bg-green-600 hover:bg-green-700 px-4 py-2 rounded">
-                                                    ${isTimerRunning ? icons.Pause : icons.Play}
-                                                    ${isTimerRunning ? 'Pausar' : 'Iniciar'}
+                                                    ${isTimerRunning ? icons.Pause : icons.Play} ${isTimerRunning ? 'Pausar' : 'Iniciar'}
                                                 </button>
                                                 <button onclick="resetTimer()" class="flex items-center gap-2 bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded">
-                                                    ${icons.RotateCcw}
-                                                    Reset
+                                                    ${icons.RotateCcw} Reset
                                                 </button>
                                             </div>
                                         </div>
@@ -331,19 +334,18 @@
                     </div>
                 `;
             } else {
+                // Vista de lista de ejercicios
                 root.innerHTML = `
                     <div class="min-h-screen py-8">
                         <div class="container mx-auto px-4">
                             <div class="max-w-4xl mx-auto">
                                 <div class="flex items-center justify-between mb-8">
                                     <button onclick="selectDay(null)" class="flex items-center gap-2 text-gray-300 hover:text-white transition-colors">
-                                        ${icons.X}
-                                        Volver al menú
+                                        ${icons.X} Volver al menú
                                     </button>
                                     <div class="text-center">
                                         <h1 class="text-3xl font-bold flex items-center gap-2">
-                                            <span class="text-2xl">${currentPlan.emoji}</span>
-                                            Día ${currentDay} - ${currentPlan.name}
+                                            <span class="text-2xl">${currentPlan.emoji}</span> Día ${currentDay} - ${currentPlan.name}
                                         </h1>
                                     </div>
                                     <div class="w-20"></div>
@@ -436,7 +438,6 @@
             render();
         };
 
-        let timerInterval;
         const startTimerInterval = () => {
             if (timerInterval) clearInterval(timerInterval);
             timerInterval = setInterval(() => {
@@ -460,6 +461,9 @@
             render();
         };
 
+        // Guarda los datos en Firestore.
+        // Se llama autom‡ticamente cada vez que se actualiza una nota,
+        // o manualmente cuando se guarda una sesi—n.
         const saveWorkoutData = async (dataToSave) => {
             if (!userId) {
                 console.error("No se puede guardar, usuario no autenticado.");
@@ -468,12 +472,16 @@
             isSaving = true;
             render();
             try {
+                // Guarda los datos en una colecci—n espec’fica del usuario.
                 const workoutRef = doc(collection(db, 'artifacts', appId, 'users', userId, 'workouts'), 'user_progress');
                 await setDoc(workoutRef, dataToSave, { merge: true });
-                console.log("Datos guardados con éxito.");
+                console.log("Datos guardados con Žxito.");
                 showSaved = true;
                 render();
-                setTimeout(() => { showSaved = false; render(); }, 2000);
+                setTimeout(() => {
+                    showSaved = false;
+                    render();
+                }, 2000);
             } catch (e) {
                 console.error("Error al guardar en Firestore:", e);
             } finally {
@@ -482,6 +490,7 @@
             }
         };
 
+        // Actualiza los datos de una serie en el estado local.
         const updateSetData = (exerciseId, setIndex, field, value) => {
             const newData = { ...workoutData };
             if (!newData[exerciseId]) newData[exerciseId] = {};
@@ -492,10 +501,12 @@
             render();
         };
 
+        // Obtiene los datos de una serie del estado local.
         const getSetData = (exerciseId, setIndex, field) => {
             return workoutData[exerciseId]?.sets?.[setIndex]?.[field] || '';
         };
 
+        // Actualiza las notas de un ejercicio y guarda autom‡ticamente.
         const updateExerciseNotes = (exerciseId, notes) => {
             const newData = { ...workoutData };
             if (!newData[exerciseId]) newData[exerciseId] = {};
@@ -504,28 +515,35 @@
             saveWorkoutData(workoutData);
             render();
         };
-        
+
+        // Obtiene las notas de un ejercicio del estado local.
         const getExerciseNotes = (exerciseId) => {
             return workoutData[exerciseId]?.generalNotes || '';
         };
 
+        // Procesa y guarda la sesi—n de entrenamiento.
         const saveWorkoutSession = async (exerciseId) => {
             const currentDate = new Date().toLocaleDateString('es-ES');
             const newSessionData = { ...workoutData };
             if (!newSessionData[exerciseId]) newSessionData[exerciseId] = {};
             if (!newSessionData[exerciseId].history) newSessionData[exerciseId].history = [];
 
+            // Guarda los datos actuales como la "œltima sesi—n"
             newSessionData[exerciseId].lastSession = newSessionData[exerciseId].sets || {};
             newSessionData[exerciseId].lastWorkoutDate = currentDate;
-            newSessionData[exerciseId].history.push({
-                date: currentDate,
-                sets: newSessionData[exerciseId].sets || {}
-            });
+
+            // Agrega los datos de la sesi—n al historial
+            newSessionData[exerciseId].history.push({ date: currentDate, sets: newSessionData[exerciseId].sets || {} });
+
+            // Limpia los datos de la sesi—n actual despuŽs de guardar
+            newSessionData[exerciseId].sets = {};
+
             workoutData = newSessionData;
             await saveWorkoutData(workoutData);
             render();
         };
 
+        // Expone las funciones al ámbito global para los eventos onclick
         window.selectDay = selectDay;
         window.selectExercise = selectExercise;
         window.startTimer = startTimer;
@@ -537,7 +555,7 @@
         window.getExerciseNotes = getExerciseNotes;
         window.saveWorkoutSession = saveWorkoutSession;
 
-        // Inicializar Firebase
+        // Inicializa Firebase y carga los datos del usuario
         window.onload = () => {
             try {
                 if (Object.keys(firebaseConfig).length > 0) {
@@ -547,6 +565,7 @@
                     
                     onAuthStateChanged(auth, async (user) => {
                         if (!user) {
+                            // Autentica al usuario si aœn no lo est‡
                             if (initialAuthToken) {
                                 await signInWithCustomToken(auth, initialAuthToken);
                             } else {
@@ -555,6 +574,8 @@
                         } else {
                             userId = user.uid;
                             isAuthReady = true;
+
+                            // Escucha los cambios en la base de datos en tiempo real.
                             const workoutRef = doc(collection(db, 'artifacts', appId, 'users', userId, 'workouts'), 'user_progress');
                             onSnapshot(workoutRef, (docSnap) => {
                                 if (docSnap.exists()) {
@@ -572,6 +593,7 @@
                         render();
                         startTimerInterval();
                     });
+
                 } else {
                     console.error("Firebase config is missing.");
                     isAuthReady = true;
@@ -583,9 +605,9 @@
                 render();
             }
         };
-
     </script>
 </body>
 </html>
+
 
 
