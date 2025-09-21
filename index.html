@@ -3,437 +3,587 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Análisis Interactivo de la Cultura Organizacional de Google</title>
-    <!-- Chosen Palette: Calm Neutral -->
-    <!-- Application Structure Plan: The SPA is designed as a top-down narrative scroll. It starts with a high-impact statistic (hiring rate) to hook the user. It then flows into three core thematic sections: 1) The Cultural Blueprint, using an interactive radar chart to holistically present the core pillars; 2) The Architects of Culture, which now includes an AI-powered summarization tool; and 3) The Tangible Impact, using dynamic charts to visualize business and environmental outcomes. The user flow is a simple, linear scroll, enhanced by a specific AI interaction within the "Architects" section to provide deeper insights and a more engaging experience. -->
-    <!-- Visualization & Content Choices: 
-        - Hiring Rate (<0.5%): Report Info -> Goal: Inform/Impact -> Viz: "Big Number" static text -> Justification: Immediate, powerful hook.
-        - 7 Cultural Pillars: Report Info -> Goal: Organize/Inform -> Viz: Interactive Radar Chart -> Interaction: Hover tooltips -> Justification: Shows the multi-faceted, balanced nature of the culture in one view. Library: Chart.js (Canvas).
-        - Leadership Influence: Report Info -> Goal: Explain Process -> Viz: Flowchart Diagram -> Interaction: AI-powered summary button -> Justification: Clearly illustrates the hierarchical flow, and the AI summary provides a quick takeaway. Method: HTML/CSS with Tailwind.
-        - Business & Employee Impact: Report Info -> Goal: Compare/Inform -> Viz: Donut Charts & Bar Chart -> Interaction: Hover tooltips -> Justification: Donuts show composition of impact drivers; the bar chart provides a stark before-and-after comparison of the maternity policy's success. Library: Chart.js (Canvas).
-    -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <title>Tracker de Entrenamiento</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #F8F7F4;
-            color: #4A4A4A;
+            background: linear-gradient(to bottom right, #1a202c, #2d3748);
+            color: #e2e8f0;
         }
-        .chart-container {
-            position: relative;
-            width: 100%;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            height: 40vh;
-            max-height: 400px;
+        .container {
+            max-width: 48rem;
         }
-        .small-chart-container {
-            position: relative;
-            width: 100%;
-            max-width: 350px;
-            margin-left: auto;
-            margin-right: auto;
-            height: 35vh;
-            max-height: 300px;
+        .shadow-xl {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
         }
-        @media (min-width: 768px) {
-            .chart-container {
-                height: 50vh;
-                max-height: 450px;
-            }
-        }
-        .card {
-            background-color: #FFFFFF;
-            border: 1px solid #EAE8E1;
-        }
-        .flow-arrow {
-            color: #A8A08D;
-        }
-        .nav-button {
-            transition: all 0.3s ease;
-        }
-        .nav-button.active {
-            color: #2E6A82;
-            border-bottom-color: #2E6A82;
-        }
-        .nav-button:not(.active) {
-            border-bottom-color: transparent;
-        }
-        #loadingSpinner {
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            border-left-color: #2E6A82;
-            animation: spin 1s ease infinite;
-            display: none;
-        }
-        #loadingSpinnerSummary {
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            border-left-color: #2E6A82;
-            animation: spin 1s ease infinite;
-            display: none;
+        .animate-spin {
+            animation: spin 1s linear infinite;
         }
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
-<body class="antialiased">
+<body>
+    <div id="root" class="min-h-screen p-4 sm:p-8"></div>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
-        <header class="text-center py-12">
-            <h1 class="text-4xl md:text-5xl font-bold text-[#333333] mb-4">La Cultura como Ventaja Competitiva</h1>
-            <p class="text-lg text-slate-600 max-w-3xl mx-auto">Un análisis interactivo de cómo Google diseña intencionadamente su cultura organizacional para impulsar la innovación, atraer al mejor talento y lograr un éxito sostenido.</p>
-        </header>
-        
-        <nav class="sticky top-0 bg-[#F8F7F4]/80 backdrop-blur-sm z-10 mb-12 border-b border-slate-200">
-            <div class="max-w-5xl mx-auto flex justify-center items-center space-x-4 sm:space-x-8 py-3">
-                <button onclick="scrollToSection('blueprint')" class="nav-button active text-sm sm:text-base font-medium border-b-2 pb-1">Pilares Culturales</button>
-                <button onclick="scrollToSection('architects')" class="nav-button text-sm sm:text-base font-medium border-b-2 pb-1">Liderazgo</button>
-                <button onclick="scrollToSection('impact')" class="nav-button text-sm sm:text-base font-medium border-b-2 pb-1">Impacto</button>
-            </div>
-        </nav>
-
-        <main class="space-y-16">
-
-            <section id="blueprint" class="scroll-mt-24">
-                <div class="text-center mb-10">
-                    <h2 class="text-3xl font-bold text-[#333333]">El ADN de Google: Pilares Culturales</h2>
-                    <p class="mt-2 max-w-2xl mx-auto text-slate-600">La cultura de Google es un ecosistema de siete pilares interconectados. Este perfil visualiza el énfasis relativo en cada área, mostrando un enfoque equilibrado que prioriza tanto la innovación como el bienestar de las personas. Interactúa con el gráfico para explorar cada pilar.</p>
-                </div>
-                <div class="card rounded-xl shadow-sm p-4 md:p-6">
-                    <div class="chart-container">
-                        <canvas id="pillarsChart"></canvas>
-                    </div>
-                </div>
-            </section>
-            
-            <hr class="border-slate-200">
-
-            <section id="architects" class="scroll-mt-24">
-                <div class="text-center mb-10">
-                    <h2 class="text-3xl font-bold text-[#333333]">Los Arquitectos de la Cultura</h2>
-                    <p class="mt-2 max-w-2xl mx-auto text-slate-600">La cultura de Google no es accidental; es el resultado de un diseño deliberado por parte de su liderazgo. El siguiente diagrama ilustra cómo la visión de los fundadores se traduce en principios y políticas que moldean activamente el entorno de trabajo.</p>
-                </div>
-                <div class="max-w-2xl mx-auto space-y-4">
-                    <div class="card p-4 rounded-lg text-center shadow-sm">
-                        <h3 class="font-semibold text-lg text-[#2E6A82]">1. Visión de los Fundadores</h3>
-                        <p id="visionText" class="text-sm">Observar que la creatividad surge de la informalidad. Establecer la misión de "experimentar y desafiar el status quo".</p>
-                    </div>
-                    <div class="text-center text-4xl flow-arrow">↓</div>
-                    <div class="card p-4 rounded-lg text-center shadow-sm">
-                        <h3 class="font-semibold text-lg text-[#2E6A82]">2. Estructura y Principios</h3>
-                        <p id="structureText" class="text-sm">Implementar una jerarquía plana, liderazgo de servicio y fomentar la seguridad psicológica para eliminar barreras y empoderar.</p>
-                    </div>
-                    <div class="text-center text-4xl flow-arrow">↓</div>
-                    <div class="card p-4 rounded-lg text-center shadow-sm">
-                        <h3 class="font-semibold text-lg text-[#2E6A82]">3. Políticas y Prácticas Clave</h3>
-                        <p id="policiesText" class="text-sm">Crear mecanismos como la contratación rigurosa, el uso de datos en RRHH y los OKRs para reforzar los valores culturales.</p>
-                    </div>
-                    <div class="text-center text-4xl flow-arrow">↓</div>
-                    <div class="bg-[#2E6A82] text-white p-4 rounded-lg text-center shadow-md">
-                        <h3 class="font-semibold text-lg">Resultado: Cultura de Innovación y Bienestar</h3>
-                        <p class="text-sm opacity-90">Un entorno donde el talento prospera y la innovación es constante.</p>
-                    </div>
-                    <!--<div class="flex items-center justify-center pt-4">
-                        <button onclick="handleSummarizeArchitects()" class="px-6 py-3 bg-slate-300 text-slate-800 rounded-full font-semibold shadow-sm hover:bg-slate-400 transition-colors flex items-center justify-center space-x-2">
-                           <!--  <span>Resumir con IA ✨</span>
-                            <div id="loadingSpinnerSummary" class="hidden w-5 h-5 border-2 border-slate-600 border-l-transparent rounded-full animate-spin"></div>
-                        </button>
-                    </div>
-                    <div id="summaryOutput" class="p-4 mt-4 bg-slate-50 rounded-lg text-sm leading-relaxed text-slate-700 hidden"></div> -->
-                </div>
-            </section>
-            
-            <hr class="border-slate-200">
-
-            <section id="impact" class="scroll-mt-24">
-                <div class="text-center mb-10">
-                    <h2 class="text-3xl font-bold text-[#333333]">El Impacto Tangible</h2>
-                    <p class="mt-2 max-w-2xl mx-auto text-slate-600">La inversión estratégica en cultura genera resultados medibles. Explora cómo este enfoque se traduce en éxito empresarial y en un ambiente laboral de clase mundial.</p>
-                </div>
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-                    <div class="card rounded-xl shadow-sm p-4 md:p-6 text-center">
-                        <h3 class="text-xl font-semibold text-[#2E6A82] mb-4">Impulso al Negocio</h3>
-                        <p class="text-sm text-slate-500 mb-4 h-16">La cultura de experimentación y enfoque en el usuario ha sido el motor de productos revolucionarios y de la retención del mejor talento.</p>
-                        <div class="small-chart-container">
-                            <canvas id="businessImpactChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="card rounded-xl shadow-sm p-4 md:p-6 text-center">
-                        <h3 class="text-xl font-semibold text-[#2E6A82] mb-4">Ambiente Laboral</h3>
-                        <p class="text-sm text-slate-500 mb-4 h-16">El enfoque en el bienestar, la colaboración y la flexibilidad crea un entorno altamente satisfactorio y motivador.</p>
-                        <div class="small-chart-container">
-                            <canvas id="workplaceImpactChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="card rounded-xl shadow-sm p-4 md:p-6 text-center">
-                        <h3 class="text-xl font-semibold text-[#2E6A82] mb-4">Caso de Éxito Basado en Datos</h3>
-                        <p class="text-sm text-slate-500 mb-4 h-16">Al analizar datos, RRHH mejoró la licencia de maternidad, lo que redujo la tasa de abandono de nuevas madres en un 50%.</p>
-                        <div class="small-chart-container">
-                            <canvas id="retentionChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            
-            <hr class="border-slate-200">
-
-        </main>
-        
-        <footer class="text-center mt-20 py-8 border-t border-slate-200">
-            <p class="text-sm text-slate-500">Análisis interactivo basado en el informe sobre la cultura organizacional de Google.</p>
-        </footer>
-
-    </div>
-
-    <script>
-        const palette = {
-            primary: '#2E6A82',
-            secondary: '#D9A404',
-            accent: '#BF5A36',
-            neutral: '#4A4A4A',
-            primaryLight: 'rgba(46, 106, 130, 0.2)',
-            secondaryLight: 'rgba(217, 164, 4, 0.2)',
-            accentLight: 'rgba(191, 90, 54, 0.2)',
+        // Mapeo de iconos para ser usados directamente como SVG
+        const icons = {
+            Dumbbell: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dumbbell"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18.4 5.6-1.6 1.6"/><path d="m6.4 17.6-1.6 1.6"/><path d="m21 3-3 3"/><path d="m3 21 3-3"/><path d="M11.5 11.5 13 13c-1.5 1.5-3 3-5 5l1.5 1.5c.9-.9 1.4-2 2-3-.3-.8-.9-1.5-1.5-2z"/></svg>`,
+            ChevronRight: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right"><path d="m9 18 6-6-6-6"/></svg>`,
+            X: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`,
+            ExternalLink: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-external-link"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>`,
+            Plus: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>`,
+            Minus: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-minus"><path d="M5 12h14"/></svg>`,
+            Play: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-play"><polygon points="5 3 19 12 5 21 5 3"/></svg>`,
+            Pause: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pause"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`,
+            RotateCcw: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-rotate-ccw"><path d="M3 12a9 9 0 1 0 9-9v1.2a6 6 0 1 1-6 6"/><path d="M3.5 13.5 1 11 3.5 8.5"/></svg>`,
+            Save: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-save"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2z"/><path d="M17 21v-8a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v8"/><path d="M7 3v4a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V3"/></svg>`,
+            Loader2: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-loader-2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>`,
+            Check: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check"><path d="M20 6 9 17l-5-5"/></svg>`,
         };
 
-        const tooltipTitleCallback = (tooltipItems) => {
-            const item = tooltipItems[0];
-            let label = item.chart.data.labels[item.dataIndex];
-            return Array.isArray(label) ? label.join(' ') : label;
-        };
-        
-        const wrapLabel = (label, maxLength = 16) => {
-            if (typeof label !== 'string' || label.length <= maxLength) return label;
-            const words = label.split(' ');
-            const lines = [];
-            let currentLine = '';
-            words.forEach(word => {
-                if ((currentLine + ' ' + word).trim().length > maxLength && currentLine.length > 0) {
-                    lines.push(currentLine);
-                    currentLine = word;
-                } else {
-                    currentLine = currentLine ? `${currentLine} ${word}` : word;
-                }
-            });
-            lines.push(currentLine);
-            return lines;
+        const workoutPlan = {
+          1: {
+            name: "Pecho + Tríceps",
+            color: "bg-red-500",
+            emoji: "🔴",
+            cardio: "8 min HIIT en bici (30'' fuerte / 30'' suave)",
+            exercises: [
+              { id: 1, name: "Press inclinado con barra", sets: "4x6-8", image: "🏋️‍♂️", description: "Acostado en banco inclinado, empuja la barra desde el pecho hacia arriba", muscles: "Pecho superior, tríceps, hombros", videoUrl: "https://www.youtube.com/watch?v=IP7ticIK9M8" },
+              { id: 2, name: "Press plano con mancuernas", sets: "3x8-10", special: "rest-pause última serie", image: "💪", description: "En banco plano, baja las mancuernas al pecho y empuja hacia arriba", muscles: "Pecho medio, tríceps, hombros", videoUrl: "https://www.youtube.com/watch?v=VmB1G1K7v94" },
+              { id: 3, name: "Press en máquina convergente", sets: "3x10-12", image: "🏋️", description: "Sentado en la máquina, empuja los agarres hacia adelante", muscles: "Pecho, tríceps", videoUrl: "https://www.youtube.com/watch?v=xUm0BiZCWlQ" },
+              { id: 4, name: "Aperturas en polea baja", sets: "3x12-15", image: "🤸‍♂️", description: "Con cables bajos, lleva los brazos hacia arriba y al centro", muscles: "Pecho inferior", videoUrl: "https://www.youtube.com/watch?v=3cKUD-WM0bU" },
+              { id: 5, name: "Fondos en paralelas", sets: "3x8-10", special: "lastre si podés", image: "🏃‍♂️", description: "En paralelas, baja el cuerpo y empuja hacia arriba", muscles: "Pecho inferior, tríceps", videoUrl: "https://www.youtube.com/watch?v=2z8JmcrW-As" },
+              { id: 6, name: "Tríceps en cuerda", sets: "3x15", special: "dropset última", image: "💥", description: "En polea alta, extiende los tríceps separando la cuerda", muscles: "Tríceps", videoUrl: "https://www.youtube.com/watch?v=kiuVA0gs3EI" }
+            ]
+          },
+          2: {
+            name: "Espalda + Bíceps",
+            color: "bg-blue-500",
+            emoji: "🔵",
+            cardio: "10 min caminadora inclinada (LISS zona 2-3)",
+            exercises: [
+              { id: 7, name: "Dominadas supinas", sets: "4x6-10", image: "🏋️‍♀️", description: "Colgado de la barra, sube el cuerpo con agarre supino", muscles: "Espalda, bíceps", videoUrl: "https://www.youtube.com/watch?v=eGo4IYlbE5g" },
+              { id: 8, name: "Remo en barra T", sets: "4x8-10", image: "🚣‍♂️", description: "Inclínate y tira de la barra T hacia tu abdomen", muscles: "Espalda media, bíceps", videoUrl: "https://www.youtube.com/watch?v=j3Igk5nyZE4" },
+              { id: 9, name: "Jalón con agarre V", sets: "3x12", image: "⬇️", description: "Sentado, tira del agarre V hacia el pecho", muscles: "Dorsales, bíceps", videoUrl: "https://www.youtube.com/watch?v=CAwf7n6Luuc" },
+              { id: 10, name: "Remo unilateral con mancuerna", sets: "3x12", image: "🏋️", description: "Apoyado en banco, rema la mancuerna hacia la cadera", muscles: "Dorsales, romboides, bíceps", videoUrl: "https://www.youtube.com/watch?v=roCP6wCXPqo" },
+              { id: 11, name: "Curl con barra Z", sets: "4x8-10", image: "💪", description: "De pie, flexiona los bíceps con la barra Z", muscles: "Bíceps", videoUrl: "https://www.youtube.com/watch?v=kwG2ipFRgfo" },
+              { id: 12, name: "Curl alterno en banco inclinado", sets: "3x10-12", image: "🏋️‍♂️", description: "En banco inclinado, alterna curls con mancuernas", muscles: "Bíceps", videoUrl: "https://www.youtube.com/watch?v=soxrZlIl35U" }
+            ]
+          },
+          3: {
+            name: "Piernas",
+            color: "bg-green-500",
+            emoji: "🟢",
+            cardio: null,
+            exercises: [
+              { id: 13, name: "Sentadilla frontal con barra", sets: "4x8-10", image: "🏋️‍♀️", description: "Barra en la parte frontal, baja en sentadilla", muscles: "Cuádriceps, glúteos, core", videoUrl: "https://www.youtube.com/watch?v=uYumuL_G_V0" },
+              { id: 14, name: "Prensa 45° pies bajos", sets: "4x12", image: "🦵", description: "En máquina de prensa, pies en posición baja", muscles: "Cuádriceps, glúteos", videoUrl: "https://www.youtube.com/watch?v=IZxyjW7MPJQ" },
+              { id: 15, name: "Peso muerto rumano con barra", sets: "4x10", image: "🏋️", description: "Barra pegada al cuerpo, baja manteniendo piernas semi-flexionadas", muscles: "Glúteos, femorales", videoUrl: "https://www.youtube.com/watch?v=2SHsk9AzdjA" },
+              { id: 16, name: "Zancadas caminando", sets: "3x12 c/pierna", image: "🚶‍♂️", description: "Da pasos largos alternando piernas", muscles: "Glúteos, cuádriceps, femorales", videoUrl: "https://www.youtube.com/watch?v=D7KaRcUTQeE" },
+              { id: 17, name: "Curl femoral en máquina", sets: "3x12-15", image: "🦵", description: "Acostado, flexiona las piernas hacia los glúteos", muscles: "Femorales", videoUrl: "https://www.youtube.com/watch?v=1Tq3QdYUuHs" },
+              { id: 18, name: "Gemelos en prensa", sets: "4x20", image: "🏋️‍♂️", description: "En prensa, trabaja solo con la punta de los pies", muscles: "Gemelos", videoUrl: "https://www.youtube.com/watch?v=3jCwWyFsrj4" }
+            ]
+          },
+          4: {
+            name: "Hombros + Abdomen",
+            color: "bg-purple-500",
+            emoji: "🟣",
+            cardio: null,
+            exercises: [
+              { id: 19, name: "Press militar con mancuernas", sets: "4x8-10", image: "🏋️‍♀️", description: "Sentado, empuja las mancuernas desde los hombros hacia arriba", muscles: "Hombros, tríceps", videoUrl: "https://www.youtube.com/watch?v=qEwKCR5JCog" },
+              { id: 20, name: "Press Arnold", sets: "3x10-12", image: "💪", description: "Rota las mancuernas mientras empujas hacia arriba", muscles: "Hombros completos", videoUrl: "https://www.youtube.com/watch?v=6Z15_WdXmVw" },
+              { id: 21, name: "Elevaciones laterales en máquina", sets: "3x12-15", special: "dropset última", image: "🤸‍♂️", description: "Sentado, eleva los brazos hacia los lados", muscles: "Hombro lateral", videoUrl: "https://www.youtube.com/watch?v=3VcKaas9EaU" },
+              { id: 22, name: "Remo al cuello con barra", sets: "3x12", image: "🏋️", description: "Tira de la barra hacia el cuello con codos altos", muscles: "Hombros, trapecios", videoUrl: "https://www.youtube.com/watch?v=XP8H8MtUlbE" },
+              { id: 23, name: "Pájaros con mancuernas", sets: "3x15", image: "🦅", description: "Inclínate y abre los brazos hacia los lados", muscles: "Hombro posterior", videoUrl: "https://www.youtube.com/watch?v=T1U3_ymG2d4" },
+              { id: 24, name: "Ab wheel", sets: "3x12", image: "⚙️", description: "Rueda hacia adelante manteniendo el core tenso", muscles: "Abdominales, core", videoUrl: "https://www.youtube.com/watch?v=UAxrT_AFmjw" },
+              { id: 25, name: "Crunch inverso en banco declinado", sets: "3x15", image: "🏋️‍♂️", description: "En banco declinado, lleva las rodillas al pecho", muscles: "Abdominales inferiores", videoUrl: "https://www.youtube.com/watch?v=CA3lq6m-ols" }
+            ]
+          },
+          5: {
+            name: "Upper Power",
+            color: "bg-orange-500",
+            emoji: "🟠",
+            cardio: "10 min HIIT (remo o assault bike)",
+            exercises: [
+              { id: 26, name: "Press plano con barra", sets: "4x6-8", image: "🏋️‍♂️", description: "En banco plano, empuja la barra desde el pecho", muscles: "Pecho, tríceps, hombros", videoUrl: "https://www.youtube.com/watch?v=gRVjAtPip0Y" },
+              { id: 27, name: "Dominadas neutras", sets: "4x6-10", image: "🏋️‍♀️", description: "Colgado con agarre neutro, sube el cuerpo", muscles: "Espalda, bíceps", videoUrl: "https://www.youtube.com/watch?v=eGo4IYlbE5g" },
+              { id: 28, name: "Remo con barra", sets: "4x8", image: "🚣‍♂️", description: "Inclínate y tira de la barra hacia el abdomen", muscles: "Espalda, bíceps", videoUrl: "https://www.youtube.com/watch?v=9efgcAjQe7E" },
+              { id: 29, name: "Press militar en máquina", sets: "3x8-10", special: "rest-pause última", image: "🏋️", description: "Sentado en máquina, empuja hacia arriba", muscles: "Hombros, tríceps", videoUrl: "https://www.youtube.com/watch?v=M2rwvNhTOu0" },
+              { id: 30, name: "Curl martillo en polea", sets: "3x12", image: "🔨", description: "Con agarre neutro, flexiona los bíceps", muscles: "Bíceps, antebrazos", videoUrl: "https://www.youtube.com/watch?v=TwD-YGVP4Bk" },
+              { id: 31, name: "Extensión de tríceps por encima de la cabeza con cuerda", sets: "3x12-15", image: "💥", description: "Extiende los tríceps por encima de la cabeza", muscles: "Tríceps", videoUrl: "https://www.youtube.com/watch?v=CLAzwNJUgUg" }
+            ]
+          }
         };
 
-        const defaultChartOptions = {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        color: palette.neutral,
-                        font: { family: "'Inter', sans-serif" },
-                        boxWidth: 15,
-                        padding: 20
-                    }
-                },
-                tooltip: {
-                    callbacks: { title: tooltipTitleCallback },
-                    backgroundColor: palette.neutral,
-                    titleFont: { family: "'Inter', sans-serif", size: 14, weight: 'bold' },
-                    bodyFont: { family: "'Inter', sans-serif", size: 12 },
-                    padding: 10,
-                    cornerRadius: 4
-                }
+        const root = document.getElementById('root');
+        let currentDay = null;
+        let selectedExercise = null;
+        let timer = 0;
+        let isTimerRunning = false;
+        let workoutData = {};
+        let isAuthReady = false;
+        let userId = null;
+        let isSaving = false;
+        let showSaved = false;
+
+        let db, auth;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        const render = () => {
+            if (!isAuthReady) {
+                root.innerHTML = `
+                    <div class="min-h-screen flex items-center justify-center">
+                        <div class="text-center">
+                            <div class="inline-block h-10 w-10 animate-spin text-blue-500">${icons.Loader2}</div>
+                            <p class="mt-4 text-gray-400">Cargando datos...</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            if (!currentDay) {
+                root.innerHTML = `
+                    <div class="min-h-screen py-8">
+                        <div class="container mx-auto px-4">
+                            <div class="text-center mb-8">
+                                <h1 class="text-4xl font-bold mb-2 flex items-center justify-center gap-2">
+                                    ${icons.Dumbbell}
+                                    Tracker de Entrenamiento
+                                </h1>
+                                <p class="text-gray-300">Selecciona tu día de entrenamiento</p>
+                                ${userId ? `<p class="text-xs text-gray-500 mt-2">ID de usuario: ${userId}</p>` : ''}
+                            </div>
+                            <div class="grid gap-4 max-w-2xl mx-auto">
+                                ${Object.entries(workoutPlan).map(([day, plan]) => `
+                                    <button onclick="selectDay(${day})" class="${plan.color} hover:opacity-90 transition-all duration-300 p-6 rounded-xl shadow-lg transform hover:scale-105">
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center gap-3">
+                                                <span class="text-2xl">${plan.emoji}</span>
+                                                <div class="text-left">
+                                                    <h3 class="text-xl font-bold">Día ${day}</h3>
+                                                    <p class="text-white/90">${plan.name}</p>
+                                                    <p class="text-sm text-white/70">${plan.exercises.length} ejercicios</p>
+                                                </div>
+                                            </div>
+                                            ${icons.ChevronRight}
+                                        </div>
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            const currentPlan = workoutPlan[currentDay];
+            if (selectedExercise) {
+                const exercise = currentPlan.exercises.find(ex => ex.id === selectedExercise);
+                const lastSessionData = workoutData[exercise.id]?.lastSession || {};
+
+                root.innerHTML = `
+                    <div class="min-h-screen py-8">
+                        <div class="container mx-auto px-4">
+                            <div class="max-w-2xl mx-auto">
+                                <button onclick="selectExercise(null)" class="mb-4 flex items-center gap-2 text-gray-300 hover:text-white transition-colors">
+                                    ${icons.X}
+                                    Volver
+                                </button>
+                                <div class="bg-gray-800 rounded-xl p-6 shadow-xl">
+                                    <div class="text-center mb-6">
+                                        <div class="text-6xl mb-4">${exercise.image}</div>
+                                        <h2 class="text-2xl font-bold mb-2">${exercise.name}</h2>
+                                        <div class="flex items-center justify-center gap-4 text-sm text-gray-300">
+                                            <span class="px-3 py-1 rounded-full ${currentPlan.color} text-white">${exercise.sets}</span>
+                                            ${exercise.special ? `<span class="px-3 py-1 rounded-full bg-yellow-600 text-white">${exercise.special}</span>` : ''}
+                                        </div>
+                                    </div>
+                                    <div class="mb-6">
+                                        <h3 class="font-semibold mb-2">Técnica:</h3>
+                                        <p class="text-gray-300 mb-4">${exercise.description}</p>
+                                        <h3 class="font-semibold mb-2">Músculos trabajados:</h3>
+                                        <p class="text-blue-300 mb-4">${exercise.muscles}</p>
+                                        ${exercise.videoUrl ? `
+                                            <div class="mb-4">
+                                                <a href="${exercise.videoUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors">
+                                                    ${icons.ExternalLink}
+                                                    Ver video tutorial
+                                                </a>
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                    <div class="space-y-6">
+                                        <div>
+                                            <h3 class="font-semibold mb-4 text-center">Registro de Series</h3>
+                                            <div class="space-y-3">
+                                                ${Array.from({ length: parseInt(exercise.sets.split('x')[0]) || 3 }).map((_, i) => {
+                                                    const setNumber = i + 1;
+                                                    const lastData = lastSessionData[setNumber] || {};
+                                                    return `
+                                                        <div class="bg-gray-700 rounded-lg p-4">
+                                                            <div class="flex items-center justify-between mb-3">
+                                                                <h4 class="font-medium">Serie ${setNumber}</h4>
+                                                                <div class="text-sm text-gray-300">
+                                                                    ${(lastData.weight || lastData.reps) ? `
+                                                                        <span class="bg-gray-600 px-2 py-1 rounded text-xs">
+                                                                            Anterior: ${lastData.weight || 0}kg × ${lastData.reps || 0}
+                                                                        </span>
+                                                                    ` : ''}
+                                                                </div>
+                                                            </div>
+                                                            <div class="grid grid-cols-2 gap-3">
+                                                                <div>
+                                                                    <label class="block text-sm font-medium mb-1">Peso (kg)</label>
+                                                                    <div class="flex items-center gap-1">
+                                                                        <button onclick="updateSetData(${exercise.id}, ${setNumber}, 'weight', (getSetData(${exercise.id}, ${setNumber}, 'weight') || 0) - 2.5)" class="bg-red-600 hover:bg-red-700 p-1 rounded text-xs">${icons.Minus}</button>
+                                                                        <input type="number" step="2.5" value="${getSetData(exercise.id, setNumber, 'weight')}" onchange="updateSetData(${exercise.id}, ${setNumber}, 'weight', parseFloat(this.value) || 0)" class="flex-1 bg-gray-600 border border-gray-500 rounded px-2 py-1 text-center text-sm" placeholder="0"/>
+                                                                        <button onclick="updateSetData(${exercise.id}, ${setNumber}, 'weight', (getSetData(${exercise.id}, ${setNumber}, 'weight') || 0) + 2.5)" class="bg-green-600 hover:bg-green-700 p-1 rounded text-xs">${icons.Plus}</button>
+                                                                    </div>
+                                                                </div>
+                                                                <div>
+                                                                    <label class="block text-sm font-medium mb-1">Reps</label>
+                                                                    <div class="flex items-center gap-1">
+                                                                        <button onclick="updateSetData(${exercise.id}, ${setNumber}, 'reps', (getSetData(${exercise.id}, ${setNumber}, 'reps') || 0) - 1)" class="bg-red-600 hover:bg-red-700 p-1 rounded text-xs">${icons.Minus}</button>
+                                                                        <input type="number" value="${getSetData(exercise.id, setNumber, 'reps')}" onchange="updateSetData(${exercise.id}, ${setNumber}, 'reps', parseInt(this.value) || 0)" class="flex-1 bg-gray-600 border border-gray-500 rounded px-2 py-1 text-center text-sm" placeholder="0"/>
+                                                                        <button onclick="updateSetData(${exercise.id}, ${setNumber}, 'reps', (getSetData(${exercise.id}, ${setNumber}, 'reps') || 0) + 1)" class="bg-green-600 hover:bg-green-700 p-1 rounded text-xs">${icons.Plus}</button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    `;
+                                                }).join('')}
+                                            </div>
+                                        </div>
+                                        <div class="bg-gray-700 rounded-lg p-4">
+                                            <h4 class="font-medium mb-3">Notas generales del ejercicio</h4>
+                                            <textarea onblur="updateExerciseNotes(${exercise.id}, this.value)" class="w-full bg-gray-600 border border-gray-500 rounded px-3 py-2 text-sm" rows="2" placeholder="Sensaciones, técnica, ajustes para la próxima...">${getExerciseNotes(exercise.id)}</textarea>
+                                        </div>
+                                        <div class="bg-blue-800/20 border border-blue-600/30 rounded-lg p-4">
+                                            <h4 class="font-medium mb-2 text-blue-300">📈 Progreso Sugerido</h4>
+                                            <div class="text-sm text-gray-300 space-y-1">
+                                                <p>• Si completaste todas las reps: +2.5kg la próxima vez</p>
+                                                <p>• Si te quedaste 2+ reps corto: mantén el peso</p>
+                                                <p>• Si fue muy fácil: +5kg la próxima vez</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex gap-2 relative">
+                                            <button onclick="saveWorkoutSession(${exercise.id})" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors relative">
+                                                ${isSaving ? `<div class="inline-block h-5 w-5 animate-spin">${icons.Loader2}</div>` : icons.Save}
+                                                Guardar Sesión
+                                            </button>
+                                            ${showSaved ? `
+                                                <div class="absolute inset-0 flex items-center justify-center bg-green-500/80 rounded-lg backdrop-blur-sm z-10 transition-opacity duration-300">
+                                                    <div class="flex items-center gap-2 text-white font-semibold">
+                                                        ${icons.Check}
+                                                        Guardado
+                                                    </div>
+                                                </div>
+                                            ` : ''}
+                                            ${workoutData[exercise.id]?.lastWorkoutDate ? `
+                                                <div class="flex-1 bg-gray-700 text-center py-3 px-4 rounded-lg">
+                                                    <div class="text-xs text-gray-400">Último entreno</div>
+                                                    <div class="text-sm font-medium">${workoutData[exercise.id].lastWorkoutDate}</div>
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                    </div>
+                                    <div class="mt-6 pt-6 border-t border-gray-700">
+                                        <h3 class="font-semibold mb-4 text-center">Temporizador de Descanso</h3>
+                                        <div class="text-center">
+                                            <div class="text-4xl font-mono mb-4 text-blue-300">
+                                                ${formatTime(timer)}
+                                            </div>
+                                            <div class="flex justify-center gap-2 mb-4">
+                                                <button onclick="startTimer(1)" class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm">1min</button>
+                                                <button onclick="startTimer(2)" class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm">2min</button>
+                                                <button onclick="startTimer(3)" class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm">3min</button>
+                                            </div>
+                                            <div class="flex justify-center gap-2">
+                                                <button onclick="toggleTimer()" class="flex items-center gap-2 bg-green-600 hover:bg-green-700 px-4 py-2 rounded">
+                                                    ${isTimerRunning ? icons.Pause : icons.Play}
+                                                    ${isTimerRunning ? 'Pausar' : 'Iniciar'}
+                                                </button>
+                                                <button onclick="resetTimer()" class="flex items-center gap-2 bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded">
+                                                    ${icons.RotateCcw}
+                                                    Reset
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                root.innerHTML = `
+                    <div class="min-h-screen py-8">
+                        <div class="container mx-auto px-4">
+                            <div class="max-w-4xl mx-auto">
+                                <div class="flex items-center justify-between mb-8">
+                                    <button onclick="selectDay(null)" class="flex items-center gap-2 text-gray-300 hover:text-white transition-colors">
+                                        ${icons.X}
+                                        Volver al menú
+                                    </button>
+                                    <div class="text-center">
+                                        <h1 class="text-3xl font-bold flex items-center gap-2">
+                                            <span class="text-2xl">${currentPlan.emoji}</span>
+                                            Día ${currentDay} - ${currentPlan.name}
+                                        </h1>
+                                    </div>
+                                    <div class="w-20"></div>
+                                </div>
+                                <div class="grid gap-4">
+                                    ${currentPlan.exercises.map(exercise => `
+                                        <div onclick="selectExercise(${exercise.id})" class="bg-gray-800 rounded-lg p-4 hover:bg-gray-750 transition-colors cursor-pointer">
+                                            <div class="flex items-center justify-between">
+                                                <div class="flex items-center gap-4">
+                                                    <div class="text-3xl">${exercise.image}</div>
+                                                    <div>
+                                                        <h3 class="font-semibold text-lg">${exercise.name}</h3>
+                                                        <div class="flex items-center gap-2 mt-1">
+                                                            <span class="px-2 py-1 rounded text-sm ${currentPlan.color} text-white">${exercise.sets}</span>
+                                                            ${exercise.special ? `<span class="px-2 py-1 rounded text-sm bg-yellow-600 text-white">${exercise.special}</span>` : ''}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="flex items-center gap-4">
+                                                    ${workoutData[exercise.id]?.lastSession ? `
+                                                        <div class="text-right text-sm text-gray-300">
+                                                            <div class="font-medium text-green-400 mb-1">Última sesión:</div>
+                                                            ${Object.entries(workoutData[exercise.id].lastSession).map(([setNum, setData]) => (
+                                                                (setData.weight > 0 || setData.reps > 0) ? `
+                                                                    <div class="text-xs">S${setNum}: ${setData.weight || 0}kg × ${setData.reps || 0}</div>
+                                                                ` : ''
+                                                            )).join('')}
+                                                            ${workoutData[exercise.id].lastWorkoutDate ? `<div class="text-xs text-gray-400 mt-1">${workoutData[exercise.id].lastWorkoutDate}</div>` : ''}
+                                                        </div>
+                                                    ` : ''}
+                                                    ${icons.ChevronRight}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                ${currentPlan.cardio ? `
+                                    <div class="mt-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg p-4">
+                                        <div class="flex items-center gap-3">
+                                            <span class="text-2xl">🏃‍♂️</span>
+                                            <div>
+                                                <h3 class="font-semibold text-lg">Cardio</h3>
+                                                <p class="text-white/90">${currentPlan.cardio}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ` : ''}
+                                ${timer > 0 ? `
+                                    <div class="fixed bottom-4 right-4 bg-blue-600 text-white p-4 rounded-lg shadow-lg">
+                                        <div class="text-center">
+                                            <div class="text-2xl font-mono mb-2">${formatTime(timer)}</div>
+                                            <div class="flex gap-2">
+                                                <button onclick="toggleTimer()" class="bg-white text-blue-600 px-3 py-1 rounded text-sm hover:bg-gray-100">
+                                                    ${isTimerRunning ? 'Pausar' : 'Reanudar'}
+                                                </button>
+                                                <button onclick="resetTimer()" class="bg-gray-600 text-white px-3 py-1 rounded text-sm hover:bg-gray-700">
+                                                    Reset
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
             }
         };
 
-        const pillarsData = {
-            labels: [
-                'Innovación y Experimentación', 'Enfoque en el Usuario', 'Transparencia', 'Colaboración', 'Bienestar del Empleado', 'Decisiones Basadas en Datos', 'Contratación Rigurosa'
-            ].map(l => wrapLabel(l)),
-            datasets: [{
-                label: 'Énfasis Cultural',
-                data: [10, 9, 8, 9, 10, 9, 9.5],
-                backgroundColor: palette.primaryLight,
-                borderColor: palette.primary,
-                borderWidth: 2,
-                pointBackgroundColor: palette.primary,
-                pointBorderColor: '#fff',
-                pointHoverBackgroundColor: '#fff',
-                pointHoverBorderColor: palette.primary
-            }]
+        const formatTime = (seconds) => {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
         };
 
-        new Chart(document.getElementById('pillarsChart'), {
-            type: 'radar',
-            data: pillarsData,
-            options: {
-                ...defaultChartOptions,
-                scales: {
-                    r: {
-                        angleLines: { color: '#EAE8E1' },
-                        grid: { color: '#EAE8E1' },
-                        pointLabels: {
-                            color: palette.neutral,
-                            font: { size: 12, family: "'Inter', sans-serif" }
-                        },
-                        ticks: {
-                            backdropColor: 'rgba(248, 247, 244, 0.75)',
-                            color: palette.neutral,
-                            stepSize: 2
-                        },
-                        suggestedMin: 0,
-                        suggestedMax: 10
-                    }
-                }
-            }
-        });
-
-        new Chart(document.getElementById('businessImpactChart'), {
-            type: 'doughnut',
-            data: {
-                labels: ['Innovación de Producto', 'Retención de Talento', 'Productividad'],
-                datasets: [{
-                    data: [50, 30, 20],
-                    backgroundColor: [palette.primary, palette.secondary, palette.accent],
-                    borderColor: '#FFFFFF',
-                    borderWidth: 4
-                }]
-            },
-            options: defaultChartOptions
-        });
-
-        new Chart(document.getElementById('workplaceImpactChart'), {
-            type: 'doughnut',
-            data: {
-                labels: ['Satisfacción y Compromiso', 'Colaboración Efectiva', 'Bienestar y Flexibilidad'],
-                datasets: [{
-                    data: [45, 35, 20],
-                    backgroundColor: [palette.primary, palette.secondary, palette.accent],
-                    borderColor: '#FFFFFF',
-                    borderWidth: 4
-                }]
-            },
-            options: defaultChartOptions
-        });
-        
-        new Chart(document.getElementById('retentionChart'), {
-            type: 'bar',
-            data: {
-                labels: [wrapLabel('Tasa de Abandono Previa'), wrapLabel('Tasa Post-Política')],
-                datasets: [{
-                    label: 'Tasa Relativa (%)',
-                    data: [100, 50],
-                    backgroundColor: [palette.accentLight, palette.primaryLight],
-                    borderColor: [palette.accent, palette.primary],
-                    borderWidth: 2,
-                    borderRadius: 5
-                }]
-            },
-            options: {
-                ...defaultChartOptions,
-                indexAxis: 'y',
-                scales: {
-                    x: { beginAtZero: true, grid: { display: false }, ticks: { display: false } },
-                    y: { grid: { display: false }, ticks: { color: palette.neutral } }
-                },
-                plugins: { ...defaultChartOptions.plugins, legend: { display: false } }
-            }
-        });
-        
-        function scrollToSection(sectionId) {
-            document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-
-        const sections = document.querySelectorAll('section');
-        const navButtons = document.querySelectorAll('.nav-button');
-
-        const observerOptions = {
-            root: null,
-            rootMargin: '0px',
-            threshold: 0.4
+        const startTimer = (minutes = 2) => {
+            timer = minutes * 60;
+            isTimerRunning = true;
+            render();
         };
 
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    navButtons.forEach(button => {
-                        button.classList.remove('active');
-                        if (button.getAttribute('onclick').includes(entry.target.id)) {
-                            button.classList.add('active');
-                        }
-                    });
+        const toggleTimer = () => {
+            isTimerRunning = !isTimerRunning;
+            render();
+        };
+
+        const resetTimer = () => {
+            isTimerRunning = false;
+            timer = 0;
+            render();
+        };
+
+        let timerInterval;
+        const startTimerInterval = () => {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (isTimerRunning && timer > 0) {
+                    timer--;
+                    render();
+                } else if (timer === 0 && isTimerRunning) {
+                    isTimerRunning = false;
+                    render();
                 }
-            });
-        }, observerOptions);
+            }, 1000);
+        };
 
-        sections.forEach(section => {
-            observer.observe(section);
-        });
+        const selectDay = (day) => {
+            currentDay = day;
+            render();
+        };
 
-        async function handleSummarizeArchitects() {
-            const outputDiv = document.getElementById('summaryOutput');
-            const spinner = document.getElementById('loadingSpinnerSummary');
-            
-            outputDiv.innerHTML = '';
-            spinner.style.display = 'block';
-            outputDiv.classList.add('hidden');
+        const selectExercise = (exerciseId) => {
+            selectedExercise = exerciseId;
+            render();
+        };
 
-            const visionText = document.getElementById('visionText').textContent;
-            const structureText = document.getElementById('structureText').textContent;
-            const policiesText = document.getElementById('policiesText').textContent;
-
-            const prompt = `Resume las siguientes tres fases de la cultura organizacional en una lista de viñetas. Enfócate en las ideas clave de cada fase y en su interconexión para formar un plan coherente.
-            1. Visión de los Fundadores: ${visionText}
-            2. Estructura y Principios: ${structureText}
-            3. Políticas y Prácticas Clave: ${policiesText}
-            `
-
-            let chatHistory = [];
-            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
-            const payload = { contents: chatHistory };
-            const apiKey = ""
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-
+        const saveWorkoutData = async (dataToSave) => {
+            if (!userId) {
+                console.error("No se puede guardar, usuario no autenticado.");
+                return;
+            }
+            isSaving = true;
+            render();
             try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const result = await response.json();
-                
-                if (result.candidates && result.candidates.length > 0 &&
-                    result.candidates[0].content && result.candidates[0].content.parts &&
-                    result.candidates[0].content.parts.length > 0) {
-                    const text = result.candidates[0].content.parts[0].text;
-                    outputDiv.innerHTML = text.replace(/\n/g, '<br>');
-                    outputDiv.classList.remove('hidden');
-                } else {
-                    outputDiv.innerHTML = '<p class="text-red-500">Lo siento, no se pudo generar una respuesta. Por favor, inténtalo de nuevo.</p>';
-                    outputDiv.classList.remove('hidden');
-                }
-            } catch (error) {
-                console.error('Error al llamar a la API:', error);
-                outputDiv.innerHTML = '<p class="text-red-500">Ocurrió un error. Por favor, verifica la conexión o inténtalo más tarde.</p>';
-                outputDiv.classList.remove('hidden');
+                const workoutRef = doc(collection(db, 'artifacts', appId, 'users', userId, 'workouts'), 'user_progress');
+                await setDoc(workoutRef, dataToSave, { merge: true });
+                console.log("Datos guardados con éxito.");
+                showSaved = true;
+                render();
+                setTimeout(() => { showSaved = false; render(); }, 2000);
+            } catch (e) {
+                console.error("Error al guardar en Firestore:", e);
             } finally {
-                spinner.style.display = 'none';
+                isSaving = false;
+                render();
             }
-        }
+        };
+
+        const updateSetData = (exerciseId, setIndex, field, value) => {
+            const newData = { ...workoutData };
+            if (!newData[exerciseId]) newData[exerciseId] = {};
+            if (!newData[exerciseId].sets) newData[exerciseId].sets = {};
+            if (!newData[exerciseId].sets[setIndex]) newData[exerciseId].sets[setIndex] = {};
+            newData[exerciseId].sets[setIndex][field] = value;
+            workoutData = newData;
+            render();
+        };
+
+        const getSetData = (exerciseId, setIndex, field) => {
+            return workoutData[exerciseId]?.sets?.[setIndex]?.[field] || '';
+        };
+
+        const updateExerciseNotes = (exerciseId, notes) => {
+            const newData = { ...workoutData };
+            if (!newData[exerciseId]) newData[exerciseId] = {};
+            newData[exerciseId].generalNotes = notes;
+            workoutData = newData;
+            saveWorkoutData(workoutData);
+            render();
+        };
+        
+        const getExerciseNotes = (exerciseId) => {
+            return workoutData[exerciseId]?.generalNotes || '';
+        };
+
+        const saveWorkoutSession = async (exerciseId) => {
+            const currentDate = new Date().toLocaleDateString('es-ES');
+            const newSessionData = { ...workoutData };
+            if (!newSessionData[exerciseId]) newSessionData[exerciseId] = {};
+            if (!newSessionData[exerciseId].history) newSessionData[exerciseId].history = [];
+
+            newSessionData[exerciseId].lastSession = newSessionData[exerciseId].sets || {};
+            newSessionData[exerciseId].lastWorkoutDate = currentDate;
+            newSessionData[exerciseId].history.push({
+                date: currentDate,
+                sets: newSessionData[exerciseId].sets || {}
+            });
+            workoutData = newSessionData;
+            await saveWorkoutData(workoutData);
+            render();
+        };
+
+        window.selectDay = selectDay;
+        window.selectExercise = selectExercise;
+        window.startTimer = startTimer;
+        window.toggleTimer = toggleTimer;
+        window.resetTimer = resetTimer;
+        window.updateSetData = updateSetData;
+        window.getSetData = getSetData;
+        window.updateExerciseNotes = updateExerciseNotes;
+        window.getExerciseNotes = getExerciseNotes;
+        window.saveWorkoutSession = saveWorkoutSession;
+
+        // Inicializar Firebase
+        window.onload = () => {
+            try {
+                if (Object.keys(firebaseConfig).length > 0) {
+                    const app = initializeApp(firebaseConfig);
+                    db = getFirestore(app);
+                    auth = getAuth(app);
+                    
+                    onAuthStateChanged(auth, async (user) => {
+                        if (!user) {
+                            if (initialAuthToken) {
+                                await signInWithCustomToken(auth, initialAuthToken);
+                            } else {
+                                await signInAnonymously(auth);
+                            }
+                        } else {
+                            userId = user.uid;
+                            isAuthReady = true;
+                            const workoutRef = doc(collection(db, 'artifacts', appId, 'users', userId, 'workouts'), 'user_progress');
+                            onSnapshot(workoutRef, (docSnap) => {
+                                if (docSnap.exists()) {
+                                    workoutData = docSnap.data() || {};
+                                    console.log("Datos cargados desde Firestore:", workoutData);
+                                } else {
+                                    console.log("No se encontraron datos de entrenamiento para este usuario.");
+                                }
+                                render();
+                            }, (error) => {
+                                console.error("Error al escuchar los datos:", error);
+                                render();
+                            });
+                        }
+                        render();
+                        startTimerInterval();
+                    });
+                } else {
+                    console.error("Firebase config is missing.");
+                    isAuthReady = true;
+                    render();
+                }
+            } catch (e) {
+                console.error("Firebase initialization failed:", e);
+                isAuthReady = true;
+                render();
+            }
+        };
+
     </script>
 </body>
 </html>
